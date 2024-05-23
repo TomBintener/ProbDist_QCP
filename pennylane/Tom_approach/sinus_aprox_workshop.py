@@ -1,3 +1,5 @@
+import time
+
 import pennylane as qml
 from pennylane import numpy as np
 import matplotlib.pyplot as plt
@@ -15,13 +17,14 @@ def generate_training_data(num_points=50, range_start=0, range_end=10):
     return x_train, y_train
 
 
-# Create the simplified quantum circuit
-def create_quantum_circuit(num_qubits=1):
+# Create a more complex quantum circuit
+def create_quantum_circuit(num_qubits=1, num_layers=3):
     dev = qml.device("default.qubit", wires=num_qubits)
 
     @qml.qnode(dev)
     def quantum_circuit(params, x):
-        qml.RY(params[0] * x, wires=0)
+        qml.AngleEmbedding(features=[x], wires=range(num_qubits))
+        qml.StronglyEntanglingLayers(params, wires=range(num_qubits))
         return qml.expval(qml.PauliZ(0))
 
     return quantum_circuit
@@ -39,7 +42,7 @@ def train_quantum_circuit(circuit, params, x_train, y_train, num_epochs=300, ste
     for epoch in range(num_epochs):
         params, cost_val = opt.step_and_cost(lambda v: cost(circuit, v, x_train, y_train), params)
         if epoch % 10 == 0:
-            print(f"Epoch {epoch}: cost = {cost_val}")
+            print(f"Epoch {epoch}: cost = {cost_val.item()}")
             print(f"Params: {params}")
     return params
 
@@ -64,7 +67,9 @@ def evaluate_circuit(circuit, params, x_train, y_train, x_range, y_true_func):
 
 # Main function to execute the training and evaluation
 def main():
+    start_time = time.time()
     num_qubits = 1
+    num_layers = 3  # Increase the number of layers for more complexity
     num_training_points = 50
     training_iterations = 300
 
@@ -72,11 +77,12 @@ def main():
     x_train, y_train = generate_training_data(num_points=num_training_points)
 
     # Initialize parameters
-    params = np.random.uniform(-np.pi, np.pi, size=(1,))
+    params_shape = (num_layers, num_qubits, 3)
+    params = np.random.uniform(-np.pi, np.pi, params_shape)
     params = np.array(params, requires_grad=True)  # Ensure gradient tracking
 
     # Create quantum circuit
-    circuit = create_quantum_circuit(num_qubits=num_qubits)
+    circuit = create_quantum_circuit(num_qubits=num_qubits, num_layers=num_layers)
 
     # Train the circuit
     trained_params = train_quantum_circuit(circuit, params, x_train, y_train, num_epochs=training_iterations)
@@ -84,6 +90,7 @@ def main():
     # Evaluate the circuit
     evaluate_circuit(circuit, trained_params, x_train, y_train, x_range=(-3 * np.pi, 6 * np.pi),
                      y_true_func=target_function)
+    print(f"Model trained in {time.time() - start_time} seconds")
 
 
 # Execute the main function
