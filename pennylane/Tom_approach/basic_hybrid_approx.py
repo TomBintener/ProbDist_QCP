@@ -13,11 +13,14 @@ from tensorflow.keras.layers import Dense, Input
 from tensorflow.keras.optimizers import Adam
 
 from silence_tensorflow import silence_tensorflow
+
 silence_tensorflow()
+
 
 # Define the target function
 def target_function(x):
     return np.sin(x) + 0.5 * np.cos(2 * x) + 0.25 * np.sin(3 * x)
+
 
 # Generate training data with added noise
 def generate_training_data(num_points=100, range_start=-5, range_end=15, noise_level=0.1):
@@ -26,6 +29,7 @@ def generate_training_data(num_points=100, range_start=-5, range_end=15, noise_l
     noise = noise_level * np.random.normal(size=x_train.shape)
     y_train_noisy = y_train + noise
     return x_train, y_train_noisy
+
 
 # Quantum circuit
 def create_quantum_circuit(num_qubits, num_layers):
@@ -39,6 +43,7 @@ def create_quantum_circuit(num_qubits, num_layers):
 
     weight_shapes = {"weights": (num_layers, num_qubits, 3)}
     return quantum_circuit, weight_shapes
+
 
 # Define the Keras model
 def create_model(quantum_circuit, weight_shapes):
@@ -60,6 +65,7 @@ def create_model(quantum_circuit, weight_shapes):
     model.compile(optimizer=Adam(learning_rate=0.01), loss='mse')
     return model
 
+
 # Plot results
 def plot_results(x_test, y_test, x_train, y_train, y_pred):
     plt.figure(figsize=(10, 6))
@@ -72,6 +78,7 @@ def plot_results(x_test, y_test, x_train, y_train, y_pred):
     plt.legend()
     plt.grid(True)
     plt.show()
+
 
 def main():
     # Define parameters
@@ -101,6 +108,7 @@ def main():
     # Plot results
     plot_results(x_test, y_test, x_train, y_train, y_pred)
     print(f"Total computation time: {time.time() - start_time}")
+
 
 if __name__ == "__main__":
     main()
