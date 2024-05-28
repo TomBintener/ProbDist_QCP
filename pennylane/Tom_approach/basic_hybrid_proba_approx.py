@@ -1,4 +1,5 @@
 import os
+
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
 import pennylane as qml
@@ -11,17 +12,21 @@ from tensorflow.keras.layers import Dense, Input, Softmax
 from tensorflow.keras.optimizers import Adam
 
 from silence_tensorflow import silence_tensorflow
+
 silence_tensorflow()
+
 
 # Define the target function
 def target_function(x):
     return np.sin(x) + 0.5 * np.cos(2 * x) + 0.25 * np.sin(3 * x)
+
 
 # Generate training data
 def generate_training_data(num_points=50, range_start=0, range_end=10):
     x_train = np.linspace(range_start, range_end, num_points)
     y_train = target_function(x_train)
     return x_train, y_train
+
 
 # Quantum circuit
 def create_quantum_circuit(num_qubits, num_layers):
@@ -36,6 +41,7 @@ def create_quantum_circuit(num_qubits, num_layers):
     weight_shapes = {"weights": (num_layers, num_qubits, 3)}
     return quantum_circuit, weight_shapes
 
+
 # Define the Keras model
 def create_model(quantum_circuit, weight_shapes):
     inputs = Input(shape=(1,))
@@ -43,7 +49,8 @@ def create_model(quantum_circuit, weight_shapes):
     dense2 = Dense(10, activation='relu')(dense1)
     dense3 = Dense(1, activation='linear')(dense2)
 
-    quantum_layer = qml.qnn.KerasLayer(quantum_circuit, weight_shapes, output_dim=2)(dense3)  # Adjust output_dim based on qubits
+    quantum_layer = qml.qnn.KerasLayer(quantum_circuit, weight_shapes, output_dim=2)(
+        dense3)  # Adjust output_dim based on qubits
 
     # Ensure the output from quantum layer is properly shaped
     quantum_layer = tf.reshape(quantum_layer, (-1, 2))
@@ -55,11 +62,13 @@ def create_model(quantum_circuit, weight_shapes):
     model.compile(optimizer=Adam(learning_rate=0.01), loss='sparse_categorical_crossentropy')
     return model
 
+
 # Plot results
 def plot_results(x_test, y_test, x_train, y_train, y_pred):
     plt.figure(figsize=(10, 6))
     plt.plot(x_test.numpy(), y_test, label='True Function', color='blue')
-    plt.plot(x_test.numpy(), y_pred[:, 1], label='VQC Approximation', color='red')  # Plotting the probability of class 1
+    plt.plot(x_test.numpy(), y_pred[:, 1], label='VQC Approximation',
+             color='red')  # Plotting the probability of class 1
     plt.scatter(x_train.numpy(), y_train.numpy(), color='green', label='Training Points')
     plt.xlabel('x')
     plt.ylabel('f(x)')
@@ -67,6 +76,7 @@ def plot_results(x_test, y_test, x_train, y_train, y_pred):
     plt.legend()
     plt.grid(True)
     plt.show()
+
 
 def main():
     # Define parameters
@@ -94,6 +104,7 @@ def main():
 
     # Plot results
     plot_results(x_test, y_test, x_train, y_train, y_pred)
+
 
 if __name__ == "__main__":
     main()

@@ -7,14 +7,16 @@ import matplotlib.pyplot as plt
 
 # Define the target function
 def target_function(x):
-    return np.sin(x) + 0.5 * np.cos(2 * x) + 0.25 * np.sin(3 * x)
+    return np.sin(x)
 
 
 # Generate training data
-def generate_training_data(num_points=50, range_start=0, range_end=10):
+def generate_training_data(num_points=50, range_start=0, range_end=10, noise_level=0.1):
     x_train = np.linspace(range_start, range_end, num_points)
     y_train = target_function(x_train)
-    return x_train, y_train
+    noise = noise_level * np.random.normal(size=x_train.shape)
+    y_train_noisy = y_train + noise
+    return x_train,  y_train_noisy
 
 
 # Create a more complex quantum circuit

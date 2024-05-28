@@ -19,7 +19,7 @@ silence_tensorflow()
 
 # Define the target function
 def target_function(x):
-    return np.sin(x) + 0.5 * np.cos(2 * x) + 0.25 * np.sin(3 * x)
+    return np.sin(x)
 
 
 # Generate training data with added noise
@@ -57,7 +57,6 @@ def create_model(quantum_circuit, weight_shapes):
     # Ensure the output from quantum layer is properly shaped
     quantum_layer = tf.reshape(quantum_layer, (-1, 1))
 
-    # Add more layers if needed
     dense4 = Dense(10, activation='relu')(quantum_layer)
     outputs = Dense(1, activation='linear')(dense4)
 
